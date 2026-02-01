@@ -98,6 +98,56 @@ class ProductTest {
         }
     }
 
+    @DisplayName("좋아요 수를 증가시킬 때, ")
+    @Nested
+    class IncrementLikeCount {
+
+        @DisplayName("좋아요 수가 1 증가한다.")
+        @Test
+        void incrementsLikeCountByOne() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            product.incrementLikeCount();
+
+            // assert
+            assertThat(product.getLikeCount()).isEqualTo(1);
+        }
+    }
+
+    @DisplayName("좋아요 수를 감소시킬 때, ")
+    @Nested
+    class DecrementLikeCount {
+
+        @DisplayName("좋아요 수가 1 감소한다.")
+        @Test
+        void decrementsLikeCountByOne() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            product.incrementLikeCount();
+
+            // act
+            product.decrementLikeCount();
+
+            // assert
+            assertThat(product.getLikeCount()).isEqualTo(0);
+        }
+
+        @DisplayName("좋아요 수가 0이면, 0을 유지한다.")
+        @Test
+        void staysAtZero_whenAlreadyZero() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            product.decrementLikeCount();
+
+            // assert
+            assertThat(product.getLikeCount()).isEqualTo(0);
+        }
+    }
+
     @DisplayName("상품을 수정할 때, ")
     @Nested
     class Update {

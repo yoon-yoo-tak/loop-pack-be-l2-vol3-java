@@ -24,6 +24,9 @@ public class Product extends BaseEntity {
     @Column(name = "stock", nullable = false)
     private int stock;
 
+    @Column(name = "like_count", nullable = false)
+    private int likeCount = 0;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brand_id", nullable = false)
     private Brand brand;
@@ -90,5 +93,19 @@ public class Product extends BaseEntity {
 
     public Brand getBrand() {
         return brand;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decrementLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }

@@ -12,9 +12,11 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AuthUserArgumentResolver authUserArgumentResolver;
+    private final AuthAdminArgumentResolver authAdminArgumentResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(authUserArgumentResolver);
+        resolvers.add(authAdminArgumentResolver);
     }
 }

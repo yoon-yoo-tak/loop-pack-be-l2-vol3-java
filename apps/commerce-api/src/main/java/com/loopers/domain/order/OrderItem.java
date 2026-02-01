@@ -1,9 +1,12 @@
 package com.loopers.domain.order;
 
 import com.loopers.domain.BaseEntity;
+import com.loopers.domain.common.Money;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -27,8 +30,9 @@ public class OrderItem extends BaseEntity {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "product_price", nullable = false)
-    private int productPrice;
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "product_price", nullable = false))
+    private Money productPrice;
 
     @Column(name = "brand_name", nullable = false)
     private String brandName;
@@ -39,13 +43,12 @@ public class OrderItem extends BaseEntity {
         validateProductId(productId);
         validateQuantity(quantity);
         validateProductName(productName);
-        validateProductPrice(productPrice);
         validateBrandName(brandName);
 
         this.productId = productId;
         this.quantity = quantity;
         this.productName = productName;
-        this.productPrice = productPrice;
+        this.productPrice = new Money(productPrice);
         this.brandName = brandName;
     }
 
@@ -68,12 +71,6 @@ public class OrderItem extends BaseEntity {
     private void validateProductName(String productName) {
         if (productName == null || productName.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "상품 이름은 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validateProductPrice(int productPrice) {
-        if (productPrice <= 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "상품 가격은 0보다 커야 합니다.");
         }
     }
 
@@ -100,7 +97,7 @@ public class OrderItem extends BaseEntity {
     }
 
     public int getProductPrice() {
-        return productPrice;
+        return productPrice.getAmount();
     }
 
     public String getBrandName() {

@@ -47,11 +47,11 @@ class ProductServiceIntegrationTest {
     @Nested
     class Create {
 
-        @DisplayName("올바른 정보와 존재하는 브랜드 ID가 주어지면, 상품이 저장되고 반환된다.")
+        @DisplayName("올바른 정보가 주어지면, 상품이 저장되고 반환된다.")
         @Test
         void savesAndReturnsProduct_whenValidInfoProvided() {
             // act
-            Product result = productService.create("에어맥스 90", 159000, 100, brand.getId());
+            Product result = productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
 
             // assert
             assertAll(
@@ -59,20 +59,9 @@ class ProductServiceIntegrationTest {
                 () -> assertThat(result.getName()).isEqualTo("에어맥스 90"),
                 () -> assertThat(result.getPrice()).isEqualTo(159000),
                 () -> assertThat(result.getStock()).isEqualTo(100),
-                () -> assertThat(result.getBrand().getId()).isEqualTo(brand.getId())
+                () -> assertThat(result.getBrandId()).isEqualTo(brand.getId()),
+                () -> assertThat(result.getBrandName()).isEqualTo(brand.getName())
             );
-        }
-
-        @DisplayName("존재하지 않는 브랜드 ID가 주어지면, NOT_FOUND 예외가 발생한다.")
-        @Test
-        void throwsNotFound_whenBrandDoesNotExist() {
-            // act
-            CoreException result = assertThrows(CoreException.class, () -> {
-                productService.create("에어맥스 90", 159000, 100, 999L);
-            });
-
-            // assert
-            assertThat(result.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
     }
 
@@ -84,7 +73,7 @@ class ProductServiceIntegrationTest {
         @Test
         void returnsProduct_whenIdExists() {
             // arrange
-            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId());
+            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
 
             // act
             Product result = productService.getById(saved.getId());
@@ -117,9 +106,9 @@ class ProductServiceIntegrationTest {
         @Test
         void returnsPaginatedProducts() {
             // arrange
-            productService.create("에어맥스 90", 159000, 100, brand.getId());
-            productService.create("에어포스 1", 129000, 200, brand.getId());
-            productService.create("조던 1", 199000, 50, brand.getId());
+            productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
+            productService.create("에어포스 1", 129000, 200, brand.getId(), brand.getName());
+            productService.create("조던 1", 199000, 50, brand.getId(), brand.getName());
 
             // act
             Page<Product> result = productService.getAll(null, PageRequest.of(0, 2));
@@ -136,8 +125,8 @@ class ProductServiceIntegrationTest {
         void returnsFilteredProducts_whenBrandIdProvided() {
             // arrange
             Brand anotherBrand = brandService.create("아디다스");
-            productService.create("에어맥스 90", 159000, 100, brand.getId());
-            productService.create("울트라부스트", 189000, 80, anotherBrand.getId());
+            productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
+            productService.create("울트라부스트", 189000, 80, anotherBrand.getId(), anotherBrand.getName());
 
             // act
             Page<Product> result = productService.getAll(brand.getId(), PageRequest.of(0, 20));
@@ -158,7 +147,7 @@ class ProductServiceIntegrationTest {
         @Test
         void updatesProduct_whenValidInfoProvided() {
             // arrange
-            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId());
+            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
 
             // act
             Product result = productService.update(saved.getId(), "에어포스 1", 129000, 50);
@@ -192,7 +181,7 @@ class ProductServiceIntegrationTest {
         @Test
         void deletesProduct_whenProductExists() {
             // arrange
-            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId());
+            Product saved = productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
 
             // act
             productService.delete(saved.getId());
@@ -225,8 +214,8 @@ class ProductServiceIntegrationTest {
         @Test
         void deletesAllProductsOfBrand() {
             // arrange
-            productService.create("에어맥스 90", 159000, 100, brand.getId());
-            productService.create("에어포스 1", 129000, 200, brand.getId());
+            productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
+            productService.create("에어포스 1", 129000, 200, brand.getId(), brand.getName());
 
             // act
             productService.deleteByBrandId(brand.getId());

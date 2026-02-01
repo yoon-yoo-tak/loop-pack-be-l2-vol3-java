@@ -2,7 +2,7 @@ package com.loopers.interfaces.api.order;
 
 import com.loopers.application.order.OrderFacade;
 import com.loopers.application.order.OrderInfo;
-import com.loopers.domain.order.OrderService;
+import com.loopers.domain.order.OrderItemCommand;
 import com.loopers.domain.user.User;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.interfaces.api.auth.AuthUser;
@@ -29,8 +29,8 @@ public class OrderV1Controller implements OrderV1ApiSpec {
     @PostMapping
     @Override
     public ApiResponse<OrderV1Dto.OrderResponse> createOrder(@AuthUser User user, @RequestBody OrderV1Dto.CreateRequest request) {
-        List<OrderService.OrderItemCommand> commands = request.items().stream()
-            .map(item -> new OrderService.OrderItemCommand(item.productId(), item.quantity()))
+        List<OrderItemCommand> commands = request.items().stream()
+            .map(item -> new OrderItemCommand(item.productId(), item.quantity()))
             .toList();
         OrderInfo info = orderFacade.createOrder(user, commands);
         return ApiResponse.success(OrderV1Dto.OrderResponse.from(info));

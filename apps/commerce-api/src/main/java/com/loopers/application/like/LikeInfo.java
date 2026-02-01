@@ -10,8 +10,8 @@ public record LikeInfo(Long likeId, Long productId, String productName, int prod
             product.getId(),
             product.getName(),
             product.getPrice(),
-            product.getBrand().getId(),
-            product.getBrand().getName()
+            product.getBrandId(),
+            product.getBrandName()
         );
     }
 }

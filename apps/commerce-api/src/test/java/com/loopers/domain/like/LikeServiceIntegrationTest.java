@@ -49,7 +49,7 @@ class LikeServiceIntegrationTest {
     void setUp() {
         user = userService.signup("testUser1", "Abcd1234!", "테스터", LocalDate.of(1990, 1, 1), "test@email.com");
         Brand brand = brandService.create("나이키");
-        product = productService.create("에어맥스 90", 159000, 100, brand.getId());
+        product = productService.create("에어맥스 90", 159000, 100, brand.getId(), brand.getName());
     }
 
     @AfterEach
@@ -61,9 +61,9 @@ class LikeServiceIntegrationTest {
     @Nested
     class AddLike {
 
-        @DisplayName("정상적으로 좋아요가 저장되고, 상품의 좋아요 수가 증가한다.")
+        @DisplayName("정상적으로 좋아요가 저장된다.")
         @Test
-        void savesLikeAndIncrementsCount_whenValid() {
+        void savesLike_whenValid() {
             // act
             Like result = likeService.addLike(user.getId(), product.getId());
 
@@ -71,21 +71,8 @@ class LikeServiceIntegrationTest {
             assertAll(
                 () -> assertThat(result.getId()).isNotNull(),
                 () -> assertThat(result.getUserId()).isEqualTo(user.getId()),
-                () -> assertThat(result.getProductId()).isEqualTo(product.getId()),
-                () -> assertThat(productService.getById(product.getId()).getLikeCount()).isEqualTo(1)
+                () -> assertThat(result.getProductId()).isEqualTo(product.getId())
             );
-        }
-
-        @DisplayName("존재하지 않는 상품이면, NOT_FOUND 예외가 발생한다.")
-        @Test
-        void throwsNotFound_whenProductDoesNotExist() {
-            // act
-            CoreException result = assertThrows(CoreException.class, () -> {
-                likeService.addLike(user.getId(), 999L);
-            });
-
-            // assert
-            assertThat(result.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
 
         @DisplayName("이미 좋아요한 상품이면, CONFLICT 예외가 발생한다.")
@@ -108,9 +95,9 @@ class LikeServiceIntegrationTest {
     @Nested
     class RemoveLike {
 
-        @DisplayName("정상적으로 좋아요가 삭제되고, 상품의 좋아요 수가 감소한다.")
+        @DisplayName("정상적으로 좋아요가 삭제된다.")
         @Test
-        void removesLikeAndDecrementsCount_whenValid() {
+        void removesLike_whenValid() {
             // arrange
             likeService.addLike(user.getId(), product.getId());
 
@@ -118,10 +105,7 @@ class LikeServiceIntegrationTest {
             likeService.removeLike(user.getId(), product.getId());
 
             // assert
-            assertAll(
-                () -> assertThat(productService.getById(product.getId()).getLikeCount()).isEqualTo(0),
-                () -> assertThat(likeService.getLikesByUserId(user.getId())).isEmpty()
-            );
+            assertThat(likeService.getLikesByUserId(user.getId())).isEmpty();
         }
 
         @DisplayName("좋아요하지 않은 상품이면, NOT_FOUND 예외가 발생한다.")
@@ -146,7 +130,7 @@ class LikeServiceIntegrationTest {
         void returnsLikeList() {
             // arrange
             Brand anotherBrand = brandService.create("아디다스");
-            Product product2 = productService.create("울트라부스트", 189000, 80, anotherBrand.getId());
+            Product product2 = productService.create("울트라부스트", 189000, 80, anotherBrand.getId(), anotherBrand.getName());
             likeService.addLike(user.getId(), product.getId());
             likeService.addLike(user.getId(), product2.getId());
 

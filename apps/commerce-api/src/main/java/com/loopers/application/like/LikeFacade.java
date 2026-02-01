@@ -9,6 +9,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,14 +20,19 @@ public class LikeFacade {
     private final LikeService likeService;
     private final ProductService productService;
 
+    @Transactional
     public LikeInfo addLike(User user, Long productId) {
-        Like like = likeService.addLike(user.getId(), productId);
         Product product = productService.getById(productId);
+        Like like = likeService.addLike(user.getId(), productId);
+        product.incrementLikeCount();
         return LikeInfo.from(like, product);
     }
 
+    @Transactional
     public void removeLike(User user, Long productId) {
+        Product product = productService.getById(productId);
         likeService.removeLike(user.getId(), productId);
+        product.decrementLikeCount();
     }
 
     public List<LikeInfo> getUserLikes(User user, Long userId) {

@@ -1,7 +1,11 @@
 package com.loopers.application.order;
 
 import com.loopers.domain.order.Order;
+import com.loopers.domain.order.OrderItem;
+import com.loopers.domain.order.OrderItemCommand;
 import com.loopers.domain.order.OrderService;
+import com.loopers.domain.product.Product;
+import com.loopers.domain.product.ProductService;
 import com.loopers.domain.user.User;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
@@ -9,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -22,9 +27,29 @@ public class OrderFacade {
     private static final ZoneId ZONE_SEOUL = ZoneId.of("Asia/Seoul");
 
     private final OrderService orderService;
+    private final ProductService productService;
 
-    public OrderInfo createOrder(User user, List<OrderService.OrderItemCommand> itemCommands) {
-        Order order = orderService.createOrder(user.getId(), itemCommands);
+    @Transactional
+    public OrderInfo createOrder(User user, List<OrderItemCommand> itemCommands) {
+        if (itemCommands == null || itemCommands.isEmpty()) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "주문 항목은 비어있을 수 없습니다.");
+        }
+
+        List<OrderItem> orderItems = itemCommands.stream()
+            .map(command -> {
+                Product product = productService.getById(command.productId());
+                product.decrementStock(command.quantity());
+                return new OrderItem(
+                    product.getId(),
+                    command.quantity(),
+                    product.getName(),
+                    product.getPrice(),
+                    product.getBrandName()
+                );
+            })
+            .toList();
+
+        Order order = orderService.createOrder(user.getId(), orderItems);
         return OrderInfo.from(order);
     }
 

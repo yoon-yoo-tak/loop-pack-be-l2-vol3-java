@@ -1,5 +1,7 @@
 package com.loopers.application.product;
 
+import com.loopers.domain.brand.Brand;
+import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,11 @@ import org.springframework.stereotype.Component;
 public class ProductFacade {
 
     private final ProductService productService;
+    private final BrandService brandService;
 
     public ProductInfo create(String name, int price, int stock, Long brandId) {
-        Product product = productService.create(name, price, stock, brandId);
+        Brand brand = brandService.getById(brandId);
+        Product product = productService.create(name, price, stock, brand.getId(), brand.getName());
         return ProductInfo.from(product);
     }
 

@@ -2,11 +2,15 @@ package com.loopers.application.brand;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandService;
+import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -29,8 +33,11 @@ public class BrandFacade {
         return brandService.getAll(pageable).map(BrandInfo::from);
     }
 
+    @Transactional
     public BrandInfo update(Long id, String name) {
         Brand brand = brandService.update(id, name);
+        List<Product> products = productService.findAllByBrandId(id);
+        products.forEach(product -> product.updateBrandName(name));
         return BrandInfo.from(brand);
     }
 

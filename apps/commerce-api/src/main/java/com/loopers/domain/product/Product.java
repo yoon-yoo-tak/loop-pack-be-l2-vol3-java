@@ -1,14 +1,13 @@
 package com.loopers.domain.product;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.brand.Brand;
+import com.loopers.domain.common.Money;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,8 +17,9 @@ public class Product extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "price", nullable = false)
-    private int price;
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "price", nullable = false))
+    private Money price;
 
     @Column(name = "stock", nullable = false)
     private int stock;
@@ -27,43 +27,44 @@ public class Product extends BaseEntity {
     @Column(name = "like_count", nullable = false)
     private int likeCount = 0;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "brand_id", nullable = false)
-    private Brand brand;
+    @Column(name = "brand_id", nullable = false)
+    private Long brandId;
+
+    @Column(name = "brand_name", nullable = false)
+    private String brandName;
 
     protected Product() {}
 
-    public Product(String name, int price, int stock, Brand brand) {
+    public Product(String name, int price, int stock, Long brandId, String brandName) {
         validateName(name);
-        validatePrice(price);
         validateStock(stock);
-        validateBrand(brand);
+        validateBrandId(brandId);
+        validateBrandName(brandName);
 
         this.name = name;
-        this.price = price;
+        this.price = new Money(price);
         this.stock = stock;
-        this.brand = brand;
+        this.brandId = brandId;
+        this.brandName = brandName;
     }
 
     public void update(String name, int price, int stock) {
         validateName(name);
-        validatePrice(price);
         validateStock(stock);
 
         this.name = name;
-        this.price = price;
+        this.price = new Money(price);
         this.stock = stock;
+    }
+
+    public void updateBrandName(String brandName) {
+        validateBrandName(brandName);
+        this.brandName = brandName;
     }
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new CoreException(ErrorType.BAD_REQUEST, "상품 이름은 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validatePrice(int price) {
-        if (price <= 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "상품 가격은 0보다 커야 합니다.");
         }
     }
 
@@ -73,9 +74,15 @@ public class Product extends BaseEntity {
         }
     }
 
-    private void validateBrand(Brand brand) {
-        if (brand == null) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "브랜드는 필수입니다.");
+    private void validateBrandId(Long brandId) {
+        if (brandId == null || brandId <= 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "브랜드 ID는 양수여야 합니다.");
+        }
+    }
+
+    private void validateBrandName(String brandName) {
+        if (brandName == null || brandName.isBlank()) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "브랜드 이름은 비어있을 수 없습니다.");
         }
     }
 
@@ -84,15 +91,19 @@ public class Product extends BaseEntity {
     }
 
     public int getPrice() {
-        return price;
+        return price.getAmount();
     }
 
     public int getStock() {
         return stock;
     }
 
-    public Brand getBrand() {
-        return brand;
+    public Long getBrandId() {
+        return brandId;
+    }
+
+    public String getBrandName() {
+        return brandName;
     }
 
     public int getLikeCount() {

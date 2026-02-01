@@ -1,6 +1,5 @@
 package com.loopers.domain.product;
 
-import com.loopers.domain.brand.Brand;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProductTest {
 
-    private static final Brand VALID_BRAND = new Brand("나이키");
+    private static final Long VALID_BRAND_ID = 1L;
+    private static final String VALID_BRAND_NAME = "나이키";
     private static final String VALID_NAME = "에어맥스 90";
     private static final int VALID_PRICE = 159000;
     private static final int VALID_STOCK = 100;
@@ -26,14 +26,15 @@ class ProductTest {
         @Test
         void createsProduct_whenAllFieldsAreValid() {
             // act
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // assert
             assertAll(
                 () -> assertThat(product.getName()).isEqualTo(VALID_NAME),
                 () -> assertThat(product.getPrice()).isEqualTo(VALID_PRICE),
                 () -> assertThat(product.getStock()).isEqualTo(VALID_STOCK),
-                () -> assertThat(product.getBrand()).isEqualTo(VALID_BRAND)
+                () -> assertThat(product.getBrandId()).isEqualTo(VALID_BRAND_ID),
+                () -> assertThat(product.getBrandName()).isEqualTo(VALID_BRAND_NAME)
             );
         }
 
@@ -42,7 +43,7 @@ class ProductTest {
         void throwsBadRequest_whenNameIsNull() {
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
-                new Product(null, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+                new Product(null, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
             });
 
             // assert
@@ -54,7 +55,7 @@ class ProductTest {
         void throwsBadRequest_whenNameIsBlank() {
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
-                new Product("  ", VALID_PRICE, VALID_STOCK, VALID_BRAND);
+                new Product("  ", VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
             });
 
             // assert
@@ -66,7 +67,7 @@ class ProductTest {
         void throwsBadRequest_whenPriceIsZeroOrNegative() {
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
-                new Product(VALID_NAME, 0, VALID_STOCK, VALID_BRAND);
+                new Product(VALID_NAME, 0, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
             });
 
             // assert
@@ -78,19 +79,31 @@ class ProductTest {
         void throwsBadRequest_whenStockIsNegative() {
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
-                new Product(VALID_NAME, VALID_PRICE, -1, VALID_BRAND);
+                new Product(VALID_NAME, VALID_PRICE, -1, VALID_BRAND_ID, VALID_BRAND_NAME);
             });
 
             // assert
             assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         }
 
-        @DisplayName("브랜드가 null이면, BAD_REQUEST 예외가 발생한다.")
+        @DisplayName("브랜드 ID가 null이면, BAD_REQUEST 예외가 발생한다.")
         @Test
-        void throwsBadRequest_whenBrandIsNull() {
+        void throwsBadRequest_whenBrandIdIsNull() {
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
-                new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, null);
+                new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, null, VALID_BRAND_NAME);
+            });
+
+            // assert
+            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+        @DisplayName("브랜드 이름이 null이면, BAD_REQUEST 예외가 발생한다.")
+        @Test
+        void throwsBadRequest_whenBrandNameIsNull() {
+            // act
+            CoreException result = assertThrows(CoreException.class, () -> {
+                new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, null);
             });
 
             // assert
@@ -106,7 +119,7 @@ class ProductTest {
         @Test
         void incrementsLikeCountByOne() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             product.incrementLikeCount();
@@ -124,7 +137,7 @@ class ProductTest {
         @Test
         void decrementsLikeCountByOne() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
             product.incrementLikeCount();
 
             // act
@@ -138,7 +151,7 @@ class ProductTest {
         @Test
         void staysAtZero_whenAlreadyZero() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             product.decrementLikeCount();
@@ -156,7 +169,7 @@ class ProductTest {
         @Test
         void decrementsStock_whenValidQuantity() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             product.decrementStock(10);
@@ -169,7 +182,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenQuantityExceedsStock() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
@@ -184,7 +197,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenQuantityIsZero() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
@@ -199,7 +212,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenQuantityIsNegative() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
@@ -219,7 +232,7 @@ class ProductTest {
         @Test
         void updatesFields_whenValidInfoProvided() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             product.update("에어포스 1", 129000, 50);
@@ -236,7 +249,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenNameIsNull() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
@@ -251,7 +264,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenPriceIsZeroOrNegative() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {
@@ -266,7 +279,7 @@ class ProductTest {
         @Test
         void throwsBadRequest_whenStockIsNegative() {
             // arrange
-            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND_ID, VALID_BRAND_NAME);
 
             // act
             CoreException result = assertThrows(CoreException.class, () -> {

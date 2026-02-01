@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -190,6 +193,45 @@ class OrderServiceIntegrationTest {
 
             // assert
             assertThat(result.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+        }
+    }
+
+    @DisplayName("전체 주문 목록을 조회할 때, ")
+    @Nested
+    class GetAll {
+
+        @DisplayName("페이지네이션하여 전체 주문 목록을 반환한다.")
+        @Test
+        void returnsPaginatedOrders() {
+            // arrange
+            orderService.createOrder(userId, List.of(
+                new OrderService.OrderItemCommand(productId, 1)
+            ));
+            orderService.createOrder(userId, List.of(
+                new OrderService.OrderItemCommand(productId, 2)
+            ));
+            orderService.createOrder(userId, List.of(
+                new OrderService.OrderItemCommand(productId, 3)
+            ));
+
+            // act
+            Page<Order> result = orderService.getAll(PageRequest.of(0, 2));
+
+            // assert
+            assertAll(
+                () -> assertThat(result.getContent()).hasSize(2),
+                () -> assertThat(result.getTotalElements()).isEqualTo(3)
+            );
+        }
+
+        @DisplayName("주문이 없으면, 빈 페이지를 반환한다.")
+        @Test
+        void returnsEmptyPage_whenNoOrders() {
+            // act
+            Page<Order> result = orderService.getAll(PageRequest.of(0, 20));
+
+            // assert
+            assertThat(result.getContent()).isEmpty();
         }
     }
 

@@ -6,6 +6,8 @@ import com.loopers.domain.user.User;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -41,6 +43,15 @@ public class OrderFacade {
         if (!order.getUserId().equals(user.getId())) {
             throw new CoreException(ErrorType.BAD_REQUEST, "본인의 주문만 조회할 수 있습니다.");
         }
+        return OrderInfo.from(order);
+    }
+
+    public Page<OrderInfo> getAllOrders(Pageable pageable) {
+        return orderService.getAll(pageable).map(OrderInfo::from);
+    }
+
+    public OrderInfo getOrderById(Long orderId) {
+        Order order = orderService.getById(orderId);
         return OrderInfo.from(order);
     }
 }

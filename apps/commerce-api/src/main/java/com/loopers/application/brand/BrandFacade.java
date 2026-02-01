@@ -2,6 +2,7 @@ package com.loopers.application.brand;
 
 import com.loopers.domain.brand.Brand;
 import com.loopers.domain.brand.BrandService;
+import com.loopers.domain.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class BrandFacade {
 
     private final BrandService brandService;
+    private final ProductService productService;
 
     public BrandInfo create(String name) {
         Brand brand = brandService.create(name);
@@ -33,6 +35,7 @@ public class BrandFacade {
     }
 
     public void delete(Long id) {
+        productService.deleteByBrandId(id);
         brandService.delete(id);
     }
 }

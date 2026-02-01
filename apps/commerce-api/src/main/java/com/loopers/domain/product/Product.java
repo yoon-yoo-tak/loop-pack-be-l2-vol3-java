@@ -99,6 +99,16 @@ public class Product extends BaseEntity {
         return likeCount;
     }
 
+    public void decrementStock(int quantity) {
+        if (quantity <= 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "수량은 0보다 커야 합니다.");
+        }
+        if (this.stock < quantity) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "재고가 부족합니다.");
+        }
+        this.stock -= quantity;
+    }
+
     public void incrementLikeCount() {
         this.likeCount++;
     }

@@ -148,6 +148,69 @@ class ProductTest {
         }
     }
 
+    @DisplayName("재고를 차감할 때, ")
+    @Nested
+    class DecrementStock {
+
+        @DisplayName("올바른 수량이 주어지면, 재고가 차감된다.")
+        @Test
+        void decrementsStock_whenValidQuantity() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            product.decrementStock(10);
+
+            // assert
+            assertThat(product.getStock()).isEqualTo(90);
+        }
+
+        @DisplayName("재고보다 큰 수량이면, BAD_REQUEST 예외가 발생한다.")
+        @Test
+        void throwsBadRequest_whenQuantityExceedsStock() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            CoreException result = assertThrows(CoreException.class, () -> {
+                product.decrementStock(101);
+            });
+
+            // assert
+            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+        @DisplayName("수량이 0이면, BAD_REQUEST 예외가 발생한다.")
+        @Test
+        void throwsBadRequest_whenQuantityIsZero() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            CoreException result = assertThrows(CoreException.class, () -> {
+                product.decrementStock(0);
+            });
+
+            // assert
+            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+        @DisplayName("수량이 음수이면, BAD_REQUEST 예외가 발생한다.")
+        @Test
+        void throwsBadRequest_whenQuantityIsNegative() {
+            // arrange
+            Product product = new Product(VALID_NAME, VALID_PRICE, VALID_STOCK, VALID_BRAND);
+
+            // act
+            CoreException result = assertThrows(CoreException.class, () -> {
+                product.decrementStock(-1);
+            });
+
+            // assert
+            assertThat(result.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+    }
+
     @DisplayName("상품을 수정할 때, ")
     @Nested
     class Update {
